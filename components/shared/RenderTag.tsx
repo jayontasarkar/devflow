@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { Badge } from '../ui/badge';
 
 interface IProps {
-  id: string | number;
+  id: string;
   name: string;
   totalQuestions?: number;
-  showCount: boolean;
+  showCount?: boolean;
 }
 
 const RenderTag = ({ id, name, totalQuestions, showCount }: IProps) => {

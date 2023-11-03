@@ -15,12 +15,12 @@ const RightSidebar = () => {
     { _id: 5, title: 'Redux Toolkit Not Updating States as Expected?' },
   ];
   const popularTags = [
-    { _id: 1, name: 'javascript', totalQuestions: 5 },
-    { _id: 2, name: 'react', totalQuestions: 5 },
-    { _id: 3, name: 'nextjs', totalQuestions: 5 },
-    { _id: 4, name: 'vue', totalQuestions: 5 },
-    { _id: 5, name: 'mongodb', totalQuestions: 5 },
-    { _id: 6, name: 'nodejs', totalQuestions: 5 },
+    { _id: '1', name: 'javascript', totalQuestions: 5 },
+    { _id: '2', name: 'react', totalQuestions: 5 },
+    { _id: '3', name: 'nextjs', totalQuestions: 5 },
+    { _id: '4', name: 'vue', totalQuestions: 5 },
+    { _id: '5', name: 'mongodb', totalQuestions: 5 },
+    { _id: '6', name: 'nodejs', totalQuestions: 5 },
   ];
 
   return (

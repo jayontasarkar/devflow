@@ -31,7 +31,9 @@ const Filter = ({ filters, otherClasses, containerClasses }: IProps) => {
         <SelectContent>
           <SelectGroup>
             {filters.map((filter) => (
-              <SelectItem value={filter.value}>{filter.name}</SelectItem>
+              <SelectItem key={filter.value} value={filter.value}>
+                {filter.name}
+              </SelectItem>
             ))}
           </SelectGroup>
         </SelectContent>
