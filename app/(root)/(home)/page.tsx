@@ -5,65 +5,12 @@ import HomeFilters from '@/components/shared/home/HomeFilters';
 import LocalSearchBar from '@/components/shared/search/LocalSearchBar';
 import { Button } from '@/components/ui/button';
 import { HomePageFilters } from '@/constants/filters';
+import { getQuestions } from '@/lib/actions/question.action';
 import Link from 'next/link';
 
-const questions = [
-  {
-    _id: '1',
-    title: 'Cascading Deletes in SQLAlchemy?',
-    tags: [
-      { _id: '1', name: 'python' },
-      { _id: '2', name: 'sql' },
-    ],
-    author: {
-      _id: '1',
-      name: 'John Doe',
-      picture: '/assets/icons/avatar.svg',
-    },
-    upvotes: 10,
-    views: 1000000,
-    answers: [],
-    createdAt: new Date('2023-10-05T12:30:00.000Z'),
-  },
-  {
-    _id: '2',
-    title: 'How do I use express as a custom server in NextJS?',
-    tags: [
-      { _id: '3', name: 'express' },
-      { _id: '4', name: 'react' },
-      { _id: '5', name: 'next13' },
-    ],
-    author: {
-      _id: '2',
-      name: 'Jane Doe',
-      picture: '/assets/icons/avatar.svg',
-    },
-    upvotes: 15,
-    views: 12000,
-    answers: [],
-    createdAt: new Date('2023-10-01T12:30:00.000Z'),
-  },
-  {
-    _id: '3',
-    title: 'How to center a DIV perfectly in TailwindCSS?',
-    tags: [
-      { _id: '6', name: 'tailwindcss' },
-      { _id: '4', name: 'react' },
-      { _id: '7', name: 'css' },
-    ],
-    author: {
-      _id: '3',
-      name: 'Melinda Doe',
-      picture: '/assets/icons/avatar.svg',
-    },
-    upvotes: 2,
-    views: 1250,
-    answers: [],
-    createdAt: new Date('2023-09-25T12:30:00.000Z'),
-  },
-];
+export default async function Home() {
+  const result = await getQuestions({});
 
-export default function Home() {
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
@@ -94,8 +41,8 @@ export default function Home() {
       <HomeFilters />
 
       <div className="mt-10 flex w-full flex-col gap-6">
-        {questions.length > 0 ? (
-          questions.map((question) => (
+        {result?.questions && result?.questions.length > 0 ? (
+          result?.questions.map((question) => (
             <QuestionCard
               key={question._id}
               id={question._id}
