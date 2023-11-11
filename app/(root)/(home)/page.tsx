@@ -1,15 +1,43 @@
 import QuestionCard from '@/components/cards/QuestionCard';
 import Filter from '@/components/shared/Filter';
 import NoResult from '@/components/shared/NoResult';
+import Pagination from '@/components/shared/Pagination';
 import HomeFilters from '@/components/shared/home/HomeFilters';
 import LocalSearchBar from '@/components/shared/search/LocalSearchBar';
 import { Button } from '@/components/ui/button';
 import { HomePageFilters } from '@/constants/filters';
-import { getQuestions } from '@/lib/actions/question.action';
+import {
+  getQuestions,
+  getRecommendedQuestions,
+} from '@/lib/actions/question.action';
+import { SearchParamsProps } from '@/types';
+import { auth } from '@clerk/nextjs';
 import Link from 'next/link';
 
-export default async function Home() {
-  const result = await getQuestions({});
+export default async function Home({ searchParams }: SearchParamsProps) {
+  const { userId } = auth();
+
+  let result: any;
+  if (searchParams?.filter === 'recommended') {
+    if (userId) {
+      result = getRecommendedQuestions({
+        userId,
+        searchQuery: searchParams?.q,
+        page: searchParams?.page ? +searchParams.page : 1,
+      });
+    } else {
+      result = {
+        questions: [],
+        isNext: false,
+      };
+    }
+  } else {
+    result = await getQuestions({
+      searchQuery: searchParams.q,
+      filter: searchParams.filter,
+      page: searchParams?.page ? +searchParams.page : 1,
+    });
+  }
 
   return (
     <>
@@ -42,14 +70,14 @@ export default async function Home() {
 
       <div className="mt-10 flex w-full flex-col gap-6">
         {result?.questions && result?.questions.length > 0 ? (
-          result?.questions.map((question) => (
+          result?.questions.map((question: any) => (
             <QuestionCard
               key={question._id}
               id={question._id}
               title={question.title}
               tags={question.tags}
               author={question.author}
-              upvotes={question.upvotes}
+              upvotes={question.upvotes.length}
               views={question.views}
               answers={question.answers}
               createdAt={question.createdAt}
@@ -65,6 +93,13 @@ export default async function Home() {
             linkTitle="Ask a Question"
           />
         )}
+      </div>
+
+      <div className="mt-10">
+        <Pagination
+          pageNumber={searchParams?.page ? +searchParams?.page : 1}
+          isNext={result?.isNext || false}
+        />
       </div>
     </>
   );

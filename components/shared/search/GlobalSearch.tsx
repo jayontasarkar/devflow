@@ -1,9 +1,11 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
+import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import GlobalResult from './GlobalResult';
 
 const GlobalSearch = () => {
   const router = useRouter();
@@ -37,7 +39,30 @@ const GlobalSearch = () => {
     };
   }, [pathname]);
 
-  useEffect(() => {}, [search, router, pathname, searchParams, query]);
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (search) {
+        const newUrl = formUrlQuery({
+          params: searchParams.toString(),
+          key: 'global',
+          value: search,
+        });
+
+        router.push(newUrl, { scroll: false });
+      } else {
+        if (query) {
+          const newUrl = removeKeysFromQuery({
+            params: searchParams.toString(),
+            keysToRemove: ['global', 'type'],
+          });
+
+          router.push(newUrl, { scroll: false });
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [search, router, pathname, searchParams, query]);
 
   return (
     <div
@@ -66,6 +91,7 @@ const GlobalSearch = () => {
           className="paragraph-regular no-focus placeholder text-dark400_light700 border-none bg-transparent shadow-none outline-none"
         />
       </div>
+      {isOpen && <GlobalResult />}
     </div>
   );
 };

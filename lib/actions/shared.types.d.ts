@@ -10,7 +10,7 @@ export interface ICreateAnswerParams {
 
 export interface IGetAnswersParams {
   questionId: string;
-  sortBy?: string;
+  sortBy?: any;
   page?: number;
   pageSize?: number;
 }
@@ -128,7 +128,7 @@ export interface IGetAllUsersParams {
 }
 
 export interface IUpdateUserParams {
-  clerkId: string;
+  userId: string;
   updateData: Partial<IUser>;
   path: string;
 }

@@ -17,19 +17,29 @@ import { Input } from '@/components/ui/input';
 import { QuestionsSchema } from '@/lib/validations';
 
 import { useTheme } from '@/context/ThemeProvider';
-import { createQuestion } from '@/lib/actions/question.action';
+import { createQuestion, editQuestion } from '@/lib/actions/question.action';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Badge } from '../ui/badge';
+import { toast } from '../ui/use-toast';
 
 const type: string = 'create';
 
-const Question = ({ userId }: { userId: string }) => {
+interface IProps {
+  userId: string;
+  question?: string;
+  type?: string;
+}
+
+const Question = ({ type = 'create', question, userId }: IProps) => {
   const router = useRouter();
   const path = usePathname();
+
+  const parsedQuestion = question && JSON.parse(question || '');
+  const parsedTags = parsedQuestion?.tags?.map((tag: any) => tag.name);
 
   const { mode } = useTheme();
   const editorRef: any = useRef(null);
@@ -39,9 +49,9 @@ const Question = ({ userId }: { userId: string }) => {
   const form = useForm<z.infer<typeof QuestionsSchema>>({
     resolver: zodResolver(QuestionsSchema),
     defaultValues: {
-      title: '',
-      explanation: '',
-      tags: [],
+      title: parsedQuestion?.title || '',
+      explanation: parsedQuestion?.content || '',
+      tags: parsedTags || [],
     },
   });
 
@@ -49,14 +59,32 @@ const Question = ({ userId }: { userId: string }) => {
   const onSubmit = async (values: z.infer<typeof QuestionsSchema>) => {
     setIsSubmitting(true);
     try {
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: userId,
-        path,
-      });
-      router.push('/');
+      if (type === 'create') {
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author: userId,
+          path,
+        });
+        toast({
+          title: 'Question created.',
+          description: 'Your question has created successfully.',
+        });
+        router.push('/');
+      } else {
+        await editQuestion({
+          questionId: parsedQuestion._id,
+          title: values.title,
+          content: values.explanation,
+          path: path,
+        });
+        toast({
+          title: 'Question updated.',
+          description: 'Your question has updated successfully.',
+        });
+        router.push(`/question/${parsedQuestion._id.toString()}`);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -68,6 +96,8 @@ const Question = ({ userId }: { userId: string }) => {
     e: React.KeyboardEvent<HTMLInputElement>,
     field: any
   ) => {
+    if (type === 'edit') return;
+
     if (e.key === 'Enter' && field.name === 'tags') {
       e.preventDefault();
 
@@ -146,7 +176,7 @@ const Question = ({ userId }: { userId: string }) => {
                     onEditorChange={(content: string) =>
                       field.onChange(content)
                     }
-                    initialValue=""
+                    initialValue={parsedQuestion?.content || ''}
                     init={{
                       height: 350,
                       menubar: false,
@@ -202,6 +232,7 @@ const Question = ({ userId }: { userId: string }) => {
                       className="no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
                       onKeyDown={(e) => handleInputKeyDown(e, field)}
                       placeholder="Add tags..."
+                      disabled={type === 'edit'}
                     />
                     {field.value.length > 0 && (
                       <div className="flex-start mt-2.5 gap-2.5">
@@ -211,14 +242,16 @@ const Question = ({ userId }: { userId: string }) => {
                             className="subtle-medium background-light800_dark300 text-light400_dark500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize"
                           >
                             {tag}
-                            <Image
-                              src="/assets/icons/close.svg"
-                              height={12}
-                              width={12}
-                              alt="close icon"
-                              className="cursor-pointer object-contain invert-0 dark:invert"
-                              onClick={() => handleTagRemove(tag, field)}
-                            />
+                            {type === 'create' && (
+                              <Image
+                                src="/assets/icons/close.svg"
+                                height={12}
+                                width={12}
+                                alt="close icon"
+                                className="cursor-pointer object-contain invert-0 dark:invert"
+                                onClick={() => handleTagRemove(tag, field)}
+                              />
+                            )}
                           </Badge>
                         ))}
                       </div>
